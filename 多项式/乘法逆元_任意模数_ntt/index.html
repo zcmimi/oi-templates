@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>乘法逆元_任意模数_ntt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">乘法逆元_任意模数_ntt</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4239">LG 4239 任意模数多项式乘法逆</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=1&lt;&lt;18,P=1000000007;
+typedef long long ll;
+int pw(int x,int b,int p){
+    int res=1;
+    for(;b;b&gt;&gt;=1,x=1ll*x*x%p)
+        if(b&amp;1)res=1ll*res*x%p;
+    return res;
+}
+int inv(int x,int p){return pw(x,p-2,p);}
+const int m1=998244353,m2=1004535809,m3=469762049,G=3;
+const ll m12=1ll*m1*m2;
+const int i1=inv(m1,m2),i12=inv(m12%m3,m3);
+struct INT{
+    int A,B,C;
+    explicit INT(int x=0){A=B=C=x;}
+    explicit INT(int a,int b,int c){A=a,B=b,C=c;}
+    INT md(){return INT(A+(A&gt;&gt;31&amp;m1),B+(B&gt;&gt;31&amp;m2),C+(C&gt;&gt;31&amp;m3));}
+    INT operator+(const INT&amp;x){return INT(A+x.A-m1,B+x.B-m2,C+x.C-m3).md();}
+    INT operator-(const INT&amp;x){return INT(A-x.A,B-x.B,C-x.C).md();}
+    INT operator*(const INT&amp;x){return INT(1ll*A*x.A%m1,1ll*B*x.B%m2,1ll*C*x.
+    C%m3).md();}
+    INT iv(){return INT(inv(A,m1),inv(B,m2),inv(C,m3));}
+    int get(){
+        ll D=A+ll(B-A+m2)%m2*i1%m2*m1;
+        return (D+ll(C-D%m3+m3)%m3*i12%m3*(m12%P)%P)%P;
+    }
+};
+int L,r[N];
+void getL(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=0;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+}
+void swap(INT&amp;x,INT&amp;y){INT t=x;x=y;y=t;}
+void ntt(INT*A,int typ){
+    for(int i=0;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    int g1=~typ?G:inv(G,m1),g2=~typ?G:inv(G,m2),g3=~typ?G:inv(G,m3);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        INT Wn=INT(
+            pw(g1,(m1-1)/(len&lt;&lt;1),m1),
+            pw(g2,(m2-1)/(len&lt;&lt;1),m2),
+            pw(g3,(m3-1)/(len&lt;&lt;1),m3)
+        );
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1){
+            INT w=INT(1);
+            for(int k=0;k&lt;len;++k,w=w*Wn){
+                INT t=w*A[i+k+len];
+                A[i+k+len]=A[i+k]-t;
+                A[i+k]=A[i+k]+t;
+            }
+        }
+    }
+    if(~typ)return;
+    INT iL=INT(inv(L,m1),inv(L,m2),inv(L,m3));
+    for(int i=0;i&lt;L;++i)A[i]=A[i]*iL;
+}
+void mul(INT*A,INT*B,INT*C,int n){
+    static INT a[N],b[N];
+    memcpy(a,A,n*12);memcpy(b,B,n*12);
+    memset(a+n,0,(L-n)*12);memset(b+n,0,(L-n)*12);
+    ntt(a,1),ntt(b,1);
+    for(int i=0;i&lt;L;++i)C[i]=a[i]*b[i];
+    ntt(C,-1);
+}
+void get_inv(INT*A,INT*B,int n){
+    if(n==1)return B[0]=INT(inv(A[0].get(),P)),void();
+    get_inv(A,B,(n+1)&gt;&gt;1);
+    getL(n&lt;&lt;1);
+    static INT ans[N];
+    mul(A,B,ans,n);
+    for(int i=1;i&lt;n;++i)
+        ans[i]=INT(P-ans[i].get());
+    ans[0]=INT(1);
+    mul(ans,B,ans,n);
+    for(int i=0;i&lt;n;++i)B[i]=INT(ans[i].get());
+    for(int i=n;i&lt;L;++i)B[i]=INT(0);
+}
+int main(){
+    int n,x;static INT a[N],b[N];
+    scanf(&#34;%d&#34;,&amp;n);
+    for(int i=0;i&lt;n;++i)
+        scanf(&#34;%d&#34;,&amp;x),a[i]=INT(x);
+    get_inv(a,b,n);
+    for(int i=0;i&lt;n;++i)
+        printf(&#34;%d &#34;,b[i].get());
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>区间加区间乘区间查询</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">区间加区间乘区间查询</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3373">区间加区间乘线段树</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+#define ls rt&lt;&lt;1
+#define rs rt&lt;&lt;1|1
+const int N=100011;
+int n,q,p;
+typedef long long ll;
+ll mul[N&lt;&lt;2],add[N&lt;&lt;2],s[N&lt;&lt;2];
+void pu(int rt){s[rt]=(s[ls]+s[rs])%p;}
+void pd(int rt,int ln,int rn){
+    if(mul[rt]^1){
+        (mul[ls]*=mul[rt])%=p;
+        (mul[rs]*=mul[rt])%=p;
+        (add[ls]*=mul[rt])%=p;
+        (add[rs]*=mul[rt])%=p;
+        (s[ls]*=mul[rt])%=p;
+        (s[rs]*=mul[rt])%=p;
+        mul[rt]=1;
+    }
+    if(add[rt]){
+        (add[ls]+=add[rt])%=p;
+        (add[rs]+=add[rt])%=p;
+        (s[ls]+=add[rt]*ln%p)%=p;
+        (s[rs]+=add[rt]*rn%p)%=p;
+        add[rt]=0;
+    }
+}
+void build(int l,int r,int rt){
+    mul[rt]=1,add[rt]=0;
+    if(l==r){scanf(&#34;%lld&#34;,s+rt);return;}
+    int m=l+r&gt;&gt;1;
+    build(l,m,ls),build(m+1,r,rs);
+    pu(rt);
+}
+void upda(int L,int R,ll v,int l,int r,int rt){
+    if(L&lt;=l&amp;&amp;r&lt;=R){
+        (s[rt]+=v*(r-l+1)%p)%=p;
+        (add[rt]+=v)%=p;
+        return;
+    }
+    int m=l+r&gt;&gt;1;
+    pd(rt,m-l+1,r-m);
+    if(L&lt;=m)upda(L,R,v,l,m,ls);
+    if(R&gt;m)upda(L,R,v,m+1,r,rs);
+    pu(rt);
+}
+void updm(int L,int R,int v,int l,int r,int rt){
+    if(L&lt;=l&amp;&amp;r&lt;=R){
+        (s[rt]*=v)%=p,
+        (add[rt]*=v)%=p,
+        (mul[rt]*=v)%=p;
+        return;
+    }
+    int m=l+r&gt;&gt;1;
+    pd(rt,m-l+1,r-m);
+    if(L&lt;=m)updm(L,R,v,l,m,ls);
+    if(R&gt;m)updm(L,R,v,m+1,r,rs);
+    pu(rt);
+}
+int ask(int L,int R,int l,int r,int rt){
+    if(L&lt;=l&amp;&amp;r&lt;=R)return s[rt];
+    int m=l+r&gt;&gt;1,ans=0;
+    pd(rt,m-l+1,r-m);
+    if(L&lt;=m)ans=ask(L,R,l,m,ls);
+    if(R&gt;m)(ans+=ask(L,R,m+1,r,rs))%=p;
+    return ans;
+}
+int main(){
+    scanf(&#34;%d%d%d&#34;,&amp;n,&amp;q,&amp;p);
+    build(1,n,1);
+    while(q--){
+        int opt,l,r,v;
+        scanf(&#34;%d%d%d&#34;,&amp;opt,&amp;l,&amp;r);
+        if(opt==1)scanf(&#34;%d&#34;,&amp;v),updm(l,r,v,1,n,1);
+        else if(opt==2)scanf(&#34;%d&#34;,&amp;v),upda(l,r,v,1,n,1);
+        else printf(&#34;%lld\n&#34;,ask(l,r,1,n,1));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

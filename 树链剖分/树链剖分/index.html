@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>树链剖分</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">树链剖分</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3384">LG 3384 【模板】轻重链剖分</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+const int N=100011;
+int n,q,RT,p,cnt,head[N],w[N],a[N],s[N&lt;&lt;2],laz[N&lt;&lt;2];
+#define ls rt&lt;&lt;1
+#define rs rt&lt;&lt;1|1
+void pu(int rt){s[rt]=(s[ls]+s[rs])%p;}
+void pd(int rt,int ln,int rn){
+    if(laz[rt]){
+        (laz[ls]+=laz[rt])%=p;
+        (laz[rs]+=laz[rt])%=p;
+        (s[ls]+=laz[rt]*ln%p)%=p;
+        (s[rs]+=laz[rt]*rn%p)%=p;
+        laz[rt]=0;
+    }
+}
+void build(int l,int r,int rt){
+    if(l==r){s[rt]=a[l];return;}
+    int m=l+r&gt;&gt;1;
+    build(l,m,ls),build(m+1,r,rs);
+    pu(rt);
+}
+void upd(int L,int R,int v,int l=1,int r=n,int rt=1){
+    if(L&lt;=l&amp;&amp;r&lt;=R){
+        (s[rt]+=1ll*(r-l+1)*v%p)%=p;
+        (laz[rt]+=v)%=p;
+        return;
+    }
+    int m=l+r&gt;&gt;1;
+    pd(rt,m-l+1,r-m);
+    if(L&lt;=m)upd(L,R,v,l,m,ls);
+    if(R&gt;m)upd(L,R,v,m+1,r,rs);
+    pu(rt);
+}
+int ask(int L,int R,int l=1,int r=n,int rt=1){
+    if(L&lt;=l&amp;&amp;r&lt;=R)return s[rt];
+    int m=l+r&gt;&gt;1,ans=0;
+    pd(rt,m-l+1,r-m);
+    if(L&lt;=m)ans=ask(L,R,l,m,ls);
+    if(R&gt;m)(ans+=ask(L,R,m+1,r,rs))%=p;
+    return ans;
+}
+struct edge{int to,nxt;}e[N&lt;&lt;1];
+void add(int x,int y){e[++cnt].to=y;e[cnt].nxt=head[x];head[x]=cnt;}
+int f[N],d[N],siz[N],top[N],id[N],sz;
+void dfs(int x){
+    siz[x]=1;
+    for(int i=head[x],to;to=e[i].to,i;i=e[i].nxt)
+        if(to!=f[x])
+            f[to]=x,d[to]=d[x]+1,
+            dfs(to),siz[x]+=siz[to];
+}
+void bt(int x,int tp){
+    top[x]=tp,id[x]=++sz,a[id[x]]=w[x]%p;
+    int k=0;
+    for(int i=head[x],to;to=e[i].to,i;i=e[i].nxt)
+        if(to!=f[x]&amp;&amp;siz[to]&gt;siz[k])k=to;
+    if(!k)return;bt(k,tp);
+    for(int i=head[x],to;to=e[i].to,i;i=e[i].nxt)
+        if(to!=f[x]&amp;&amp;to!=k)bt(to,to);
+}
+void swap(int &amp;x,int &amp;y){x^=y,y^=x,x^=y;}
+int qry(int x,int y){
+    int res=0;
+    while(top[x]^top[y]){
+        if(d[top[x]]&lt;d[top[y]])swap(x,y);
+        res+=ask(id[top[x]],id[x]),x=f[top[x]];
+    }
+    if(id[x]&gt;id[y])swap(x,y);
+    return (res+ask(id[x],id[y]))%p;
+}
+int qry(int x){return ask(id[x],id[x]+siz[x]-1);}
+void mdy(int x,int y,int v){
+    while(top[x]^top[y]){
+        if(d[top[x]]&lt;d[top[y]])swap(x,y);
+        upd(id[top[x]],id[x],v),x=f[top[x]];
+    }
+    if(id[x]&gt;id[y])swap(x,y);
+    upd(id[x],id[y],v);
+}
+void mdy(int x,int v){upd(id[x],id[x]+siz[x]-1,v);}
+int main(){
+    int opt,x,y,z;
+    scanf(&#34;%d%d%d%d&#34;,&amp;n,&amp;q,&amp;RT,&amp;p);
+    for(int i=1;i&lt;=n;++i)scanf(&#34;%d&#34;,w+i);
+    for(int i=2;i&lt;=n;++i)
+        scanf(&#34;%d%d&#34;,&amp;x,&amp;y),
+        add(x,y),add(y,x);
+    dfs(RT),bt(RT,RT),build(1,n,1);
+    while(q--){
+        scanf(&#34;%d%d&#34;,&amp;opt,&amp;x);
+        if(opt==1)scanf(&#34;%d%d&#34;,&amp;y,&amp;z),mdy(x,y,z);
+        else if(opt==2)scanf(&#34;%d&#34;,&amp;y),printf(&#34;%d\n&#34;,qry(x,y));
+        else if(opt==3)scanf(&#34;%d&#34;,&amp;z),mdy(x,z);
+        else if(opt==4)printf(&#34;%d\n&#34;,qry(x));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

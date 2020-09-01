@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>乘法_任意模数_ntt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">乘法_任意模数_ntt</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4245">LG 4245 【模板】任意模数NTT</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+typedef long long ll;
+int P;
+int pw(int x,int b,int p=P){
+    int res=1;
+    for(;b;b&gt;&gt;=1,x=1ll*x*x%p)
+        if(b&amp;1)res=1ll*res*x%p;
+    return res;
+}
+const int m1=998244353,m2=1004535809,m3=469762049,G=3;
+const ll m12=1ll*m1*m2;
+const int i1=pw(m1,m2-2,m2),i2=pw(m12%m3,m3-2,m3);
+const int N=1&lt;&lt;18;
+struct INT{
+    int A,B,C;
+    explicit INT(){};
+    explicit INT(int x):A(x),B(x),C(x){}
+    explicit INT(int a,int b,int c):A(a),B(b),C(c){}
+    INT md(){return INT(A+(A&gt;&gt;31&amp;m1),B+(B&gt;&gt;31&amp;m2),C+(C&gt;&gt;31&amp;m3));}//A&lt;0?A+mod:A
+    INT operator+(const INT&amp;x){return INT(A+x.A-m1,B+x.B-m2,C+x.C-m3).md();}
+    INT operator-(const INT&amp;x){return INT(A-x.A,B-x.B,C-x.C).md();}
+    INT operator*(const INT&amp;x){return INT(1ll*A*x.A%m1,1ll*B*x.B%m2,1ll*C*x.C%m3).md();}
+    int get(){
+        ll D=A+ll(B-A+m2)%m2*i1%m2*m1;
+		return (D+ll(C-D%m3+m3)%m3*i2%m3*(m12%P)%P)%P;
+    }
+}a[N],b[N],c[N],W[N|1];
+int L,r[N];
+void init(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=0;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+    INT t=INT(pw(G,(m1-1)/L,m1),pw(G,(m2-1)/L,m2),pw(G,(m3-1)/L,m3));
+    *W=INT(1);for(INT*i=W;i!=W+L;++i)*(i+1)=*i*t;
+}
+void swap(INT&amp;x,INT&amp;y){INT t=x;x=y;y=t;}
+void ntt(INT*A,int typ){
+    for(int i=0;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        int t=L/len&gt;&gt;1;
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1)
+            for(int k=0;k&lt;len;++k){
+                INT w=W[~typ?t*k:L-t*k],
+                    x=w*A[i+k+len];
+                A[i+k+len]=A[i+k]-x;
+                A[i+k]=A[i+k]+x;
+            }
+    }
+    if(~typ)return;
+    INT iL=INT(pw(L,m1-2,m1),pw(L,m2-2,m2),pw(L,m3-2,m3));
+    for(INT*i=A;i!=A+L;++i)*i=*i*iL;
+}
+int main(){
+    int n,m,x;
+    scanf(&#34;%d%d%d&#34;,&amp;n,&amp;m,&amp;P);++n,++m;
+    for(int i=0;i&lt;n;++i)scanf(&#34;%d&#34;,&amp;x),a[i]=INT(x);
+    for(int i=0;i&lt;m;++i)scanf(&#34;%d&#34;,&amp;x),b[i]=INT(x);
+    init(n+m);
+    ntt(a,1),ntt(b,1);
+    for(int i=0;i&lt;L;++i)a[i]=a[i]*b[i];
+    ntt(a,-1);
+    for(int i=0;i&lt;n+m-1;++i)printf(&#34;%d &#34;,a[i].get());
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

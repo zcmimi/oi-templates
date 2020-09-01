@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>缩点</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">缩点</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+
+<pre><code class="lang-cpp">#include&lt;bits/stdc++.h&gt;
+const int N=10011;
+int min(int x,int y){return x&lt;y?x:y;}
+int n,m,cnt,head[N],c[N],f[N],deg[N];
+struct edge{int x,to,nxt;}e[N*10];
+void add(int x,int y){e[++cnt].to=y;e[cnt].nxt=head[x];head[x]=cnt;}
+int dfn[N],low[N],bl[N],q[N],tp,sz;
+bool v[N];
+void tarjan(int x){
+    dfn[x]=low[x]=++sz;
+    q[++tp]=x,v[x]=1;
+    for(int i=head[x],to;to=e[i].to,i;i=e[i].nxt)
+        if(!dfn[to])
+            tarjan(to),
+            low[x]=min(low[x],low[to]);
+        else if(v[to])low[x]=min(low[x],dfn[to]);
+    if(low[x]==dfn[x])
+        while(int k=q[tp--]){
+            v[k]=0,bl[k]=x;
+            if(k==x)break;
+            c[x]+=c[k];
+        }
+}
+int main(){
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;m);
+    for(int i=1;i&lt;=n;++i)scanf(&#34;%d&#34;,c+i);
+    int x,y,h=0,t=0,ans=0;
+    for(int i=1;i&lt;=m;++i)
+        scanf(&#34;%d%d&#34;,&amp;x,&amp;y),
+        add(x,y),e[i].x=x;
+    for(int i=1;i&lt;=n;++i)
+        if(!dfn[i])tarjan(i);
+    cnt=0;memset(head,0,sizeof head);
+    for(int i=1;i&lt;=m;++i){
+        x=bl[e[i].x],y=bl[e[i].to];
+        if(x^y)add(x,y),++deg[y];
+    }
+    for(int i=1;i&lt;=n;++i)
+        if(i==bl[i]&amp;&amp;!deg[i])q[++t]=i,f[i]=c[i];
+    while(h&lt;t){
+        x=q[++h];
+        for(int i=head[x],to;to=e[i].to,i;i=e[i].nxt){
+            if(f[x]+c[to]&gt;f[to])f[to]=f[x]+c[to];
+            if(!--deg[to])q[++t]=to;
+        }
+    }
+    for(int i=1;i&lt;=n;++i)
+        if(i==bl[i]&amp;&amp;f[i]&gt;ans)ans=f[i];
+    printf(&#34;%d\n&#34;,ans);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

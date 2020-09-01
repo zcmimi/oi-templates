@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>数列分块入门4</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">数列分块入门4</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://loj.ac/problem/6280">LOJ #6280. 数列分块入门 4</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=50001;
+typedef long long ll;
+int n,blk,a[N],laz[233],bl[N];
+ll s[233];
+void add(int l,int r,int c){
+    if(bl[l]==bl[r]){
+        for(int i=l;i&lt;=r;++i)
+            a[i]+=c,s[bl[i]]+=c;
+        return;
+    }
+    for(int i=l;bl[i]==bl[l];++i)
+        a[i]+=c,s[bl[i]]+=c;
+    for(int i=r;bl[i]==bl[r];--i)
+        a[i]+=c,s[bl[i]]+=c;
+    for(int i=bl[l]+1;i&lt;bl[r];++i)
+        laz[i]+=c,s[i]+=1ll*c*blk;
+}
+int qry(int l,int r,int p){
+    ll res=0;
+    if(bl[l]==bl[r]){
+        for(int i=l;i&lt;=r;++i)
+            (res+=a[i]+laz[bl[i]])%=p;
+        return res;
+    }
+    for(int i=l;bl[i]==bl[l];++i)
+        (res+=a[i]+laz[bl[i]])%=p;
+    for(int i=r;bl[i]==bl[r];--i)
+        (res+=a[i]+laz[bl[i]])%=p;
+    for(int i=bl[l]+1;i&lt;bl[r];++i)
+        (res+=s[i])%=p;
+    return res;
+}
+int main(){
+    scanf(&#34;%d&#34;,&amp;n);
+    blk=sqrt(n);
+    for(int i=1;i&lt;=n;++i)
+        scanf(&#34;%d&#34;,a+i),
+        bl[i]=(i-1)/blk+1,
+        s[bl[i]]+=a[i];
+    for(int t=1;t&lt;=n;++t){
+        int opt,l,r,c;
+        scanf(&#34;%d%d%d%d&#34;,&amp;opt,&amp;l,&amp;r,&amp;c);
+        if(opt==0)add(l,r,c);
+        else printf(&#34;%d\n&#34;,qry(l,r,c+1));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

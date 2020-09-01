@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>主席树</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">主席树</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3834">LG P3834 【模板】可持久化线段树 1（主席树）</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+#include&lt;algorithm&gt;
+const int N=200011;
+int n,q,sz,RT[N],ls[N*20],rs[N*20],s[N*20],a[N],c[N];
+struct node{
+    int v,p;
+    bool operator&lt;(node t){return v&lt;t.v;}
+}b[N];
+void build(int l,int r,int &amp;rt){
+    s[rt=++sz]=0;
+    if(l==r)return;
+    int m=l+r&gt;&gt;1;
+    build(l,m,ls[rt]),
+    build(m+1,r,rs[rt]);
+}
+void upd(int pre,int &amp;rt,int v,int l,int r){
+    s[rt=++sz]=s[pre]+1,
+    ls[rt]=ls[pre],
+    rs[rt]=rs[pre];
+    if(l==r)return;
+    int m=l+r&gt;&gt;1;
+    if(v&lt;=m)upd(ls[pre],ls[rt],v,l,m);
+    else upd(rs[pre],rs[rt],v,m+1,r);
+}
+int ask(int x,int y,int k,int l,int r){
+    if(l==r)return c[l];
+    int m=l+r&gt;&gt;1,cnt=s[ls[y]]-s[ls[x]];
+    if(k&lt;=cnt)return ask(ls[x],ls[y],k,l,m);
+    else return ask(rs[x],rs[y],k-cnt,m+1,r);
+}
+int main(){
+    int d=0,x,y,k;
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;q);
+    for(int i=1;i&lt;=n;++i)
+        scanf(&#34;%d&#34;,&amp;b[i].v),
+        b[i].p=i;
+    std::sort(b+1,b+n+1);
+    b[0].v=-1u&gt;&gt;1;
+    for(int i=1;i&lt;=n;++i)
+        c[a[b[i].p]=d+=b[i].v!=b[i-1].v]=b[i].v;
+    build(1,d,RT[0]);
+    for(int i=1;i&lt;=n;++i)upd(RT[i-1],RT[i],a[i],1,d);
+    while(q--)
+        scanf(&#34;%d%d%d&#34;,&amp;x,&amp;y,&amp;k),
+        printf(&#34;%d\n&#34;,ask(RT[x-1],RT[y],k,1,d));
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

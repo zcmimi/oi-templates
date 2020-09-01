@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>数列分块入门1</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">数列分块入门1</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://loj.ac/problem/6277">LOJ #6277. 数列分块入门 1</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=50001;
+int n,a[N],bl[N],laz[233],blk;
+void add(int l,int r,int c){
+    if(bl[l]==bl[r])
+        for(int i=l;i&lt;=r;++i)a[i]+=c;
+    else{
+        for(int i=l;bl[i]==bl[l];++i)a[i]+=c;
+        for(int i=bl[l]+1;i&lt;bl[r];++i)laz[i]+=c;
+        for(int i=r;bl[i]==bl[r];--i)a[i]+=c;
+    }
+}
+int main(){
+    scanf(&#34;%d&#34;,&amp;n);
+    blk=sqrt(n);
+    for(int i=1;i&lt;=n;++i)
+        scanf(&#34;%d&#34;,a+i),
+        bl[i]=(i-1)/blk+1;
+    for(int t=1;t&lt;=n;++t){
+        int opt,l,r,c;
+        scanf(&#34;%d%d%d%d&#34;,&amp;opt,&amp;l,&amp;r,&amp;c);
+        if(opt==0)add(l,r,c);
+        else printf(&#34;%d\n&#34;,a[r]+laz[bl[r]]);
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

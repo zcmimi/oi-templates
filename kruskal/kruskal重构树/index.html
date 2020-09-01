@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>kruskal重构树</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">kruskal重构树</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4197">LG P4197 Peaks</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+#include&lt;algorithm&gt;
+const int N=100011;
+int n,m,q;
+int h[N],H[N];
+struct node{
+    int v,p;
+    bool operator&lt;(node t){return v&lt;t.v;}
+}b[N];
+struct EDGE{
+    int x,y,w;
+    bool operator&lt;(EDGE t){return w&lt;t.w;}
+}E[500011];
+int cnt,head[N*2];
+struct edge{int to,nxt;}e[N*2];
+void add(int x,int y){e[++cnt].to=y;e[cnt].nxt=head[x];head[x]=cnt;}
+int RT[N],s[N*20],ls[N*20],rs[N*20],SZ,sz;
+void build(int l,int r,int &amp;rt){
+    s[rt=++sz]=0;
+    if(l==r)return;
+    int m=l+r&gt;&gt;1;
+    build(l,m,ls[rt]);
+    build(m+1,r,rs[rt]);
+}
+void ins(int pre,int &amp;rt,int v,int l=1,int r=SZ){
+    s[rt=++sz]=s[pre]+1,
+    ls[rt]=ls[pre],
+    rs[rt]=rs[pre];
+    if(l==r)return;
+    int m=l+r&gt;&gt;1;
+    if(v&lt;=m)ins(ls[pre],ls[rt],v,l,m);
+    else ins(rs[pre],rs[rt],v,m+1,r);
+}
+int ask(int x,int y,int k,int l=1,int r=SZ){
+    if(l==r)return H[l];
+    int m=l+r&gt;&gt;1,sum=s[rs[y]]-s[rs[x]];
+    if(k&lt;=sum)return ask(rs[x],rs[y],k,m+1,r);
+    else return ask(ls[x],ls[y],k-sum,l,m);
+}
+int dfn,fa[N*2],f[21][N*2],v[N*2],L[N*2],R[N*2];
+void dfs(int x){
+    for(int i=1;i&lt;=20;++i)
+        f[i][x]=f[i-1][f[i-1][x]];
+    if(!head[x]){
+        L[x]=R[x]=++dfn;
+        ins(RT[dfn-1],RT[dfn],h[x]);
+        return;
+    }
+    L[x]=dfn;
+    for(int i=head[x];i;i=e[i].nxt)dfs(e[i].to);
+    R[x]=dfn;
+}
+int gf(int x){return x==fa[x]?x:(fa[x]=gf(fa[x]));}
+void kruskal(){
+    int t=n,x,y;
+    std::sort(E+1,E+m+1);
+    for(int i=1;i&lt;=n;++i)fa[i]=i;
+    for(int i=1;i&lt;=m;++i)
+        if((x=gf(E[i].x))!=(y=gf(E[i].y))){
+            v[++t]=E[i].w;
+            fa[x]=fa[y]=fa[t]=t;
+            f[0][x]=f[0][y]=t;
+            add(t,x),add(t,y);
+        }
+    build(1,SZ,RT[0]);
+    dfs(t);
+}
+int main(){
+    scanf(&#34;%d%d%d&#34;,&amp;n,&amp;m,&amp;q);
+    for(int i=1;i&lt;=n;++i)
+        scanf(&#34;%d&#34;,&amp;b[i].v),
+        b[i].p=i;
+    std::sort(b+1,b+n+1);
+    b[0].v=-1u&gt;&gt;1;
+    for(int i=1;i&lt;=n;++i)
+        H[h[b[i].p]=SZ+=b[i].v!=b[i-1].v]=b[i].v;
+    for(int i=1;i&lt;=m;++i)
+        scanf(&#34;%d%d%d&#34;,&amp;E[i].x,&amp;E[i].y,&amp;E[i].w);
+    kruskal();
+    while(q--){
+        int x,w,k;
+        scanf(&#34;%d%d%d&#34;,&amp;x,&amp;w,&amp;k);
+        for(int i=20;~i;--i)
+            if(f[i][x]&amp;&amp;v[f[i][x]]&lt;=w)x=f[i][x];
+        if(R[x]-L[x]&lt;k)printf(&#34;-1\n&#34;);
+        else printf(&#34;%d\n&#34;,ask(RT[L[x]],RT[R[x]],k));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

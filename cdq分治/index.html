@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>cdq分治</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">cdq分治</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3810">三维偏序（陌上花开）</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=100011;
+struct node{int x,y,z,w,ans;}a[N],b[N];
+bool cmpx(node x,node y){
+    if(x.x!=y.x)return x.x&lt;y.x;
+    if(x.y!=y.y)return x.y&lt;y.y;
+    return x.z&lt;y.z;
+}
+bool cmpy(node x,node y){
+    if(x.y!=y.y)return x.y&lt;y.y;
+    return x.z&lt;y.z;
+}
+int n,m,k,ans[N],s[N*2];
+void add(int x,int v){for(;x&lt;=k;x+=x&amp;-x)s[x]+=v;}
+int ask(int x){int res=0;for(;x;x-=x&amp;-x)res+=s[x];return res;}
+void cdq(int l,int r){
+    if(l&gt;=r)return;
+    int m=l+r&gt;&gt;1,j=l;
+    cdq(l,m),cdq(m+1,r);
+    for(int i=m+1;i&lt;=r;++i){
+        for(;j&lt;=m&amp;&amp;a[j].y&lt;=a[i].y;++j)
+            add(a[j].z,a[j].w);
+        a[i].ans+=ask(a[i].z);
+    }
+    while(--j&gt;=l)add(a[j].z,-a[j].w);
+    std::merge(a+l,a+m+1,a+m+1,a+r+1,b+l,cmpy);
+    for(int i=l;i&lt;=r;++i)a[i]=b[i];
+}
+int main(){
+    scanf(&#34;%d%d&#34;,&amp;m,&amp;k);
+    for(int i=1;i&lt;=m;++i)
+        scanf(&#34;%d%d%d&#34;,&amp;a[i].x,&amp;a[i].y,&amp;a[i].z);
+    std::sort(a+1,a+m+1,cmpx);
+    for(int i=1,c=1;i&lt;=m;++i,++c)
+    if(a[i].x!=a[i+1].x||a[i].y!=a[i+1].y||a[i].z!=a[i+1].z)
+        a[++n]=a[i],a[n].w=c,c=0;
+    cdq(1,n);
+    for(int i=1;i&lt;=n;++i)
+        ans[a[i].ans+a[i].w]+=a[i].w;
+    for(int i=1;i&lt;=m;++i)
+        printf(&#34;%d\n&#34;,ans[i]);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

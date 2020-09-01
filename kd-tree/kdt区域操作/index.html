@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>kdt区域操作</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">kdt区域操作</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4148">LG 4148 简单题</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+void cmin(int&amp;x,int y){if(y&lt;x)x=y;}
+void cmax(int&amp;x,int y){if(y&gt;x)x=y;}
+int max(int x,int y){return x&gt;y?x:y;}
+const int N=200001;
+struct node{int x,y,v;}t[N];
+bool _cmp;
+bool cmp(int x,int y){return _cmp?t[x].x&lt;=t[y].x:t[x].y&lt;=t[y].y;}
+int n,cnt,rt,la,tt;
+int L[N],R[N],D[N],U[N],s[N],ls[N],rs[N],siz[N],g[N];
+void upd(int x,int y){
+    cmin(L[x],L[y]),cmax(R[x],R[y]),
+    cmin(D[x],D[y]),cmax(U[x],U[y]);
+}
+void pu(int x){
+    siz[x]=siz[ls[x]]+siz[rs[x]]+1;
+    s[x]=s[ls[x]]+s[rs[x]]+t[x].v;
+    L[x]=R[x]=t[x].x;
+    D[x]=U[x]=t[x].y;
+    if(ls[x])upd(x,ls[x]);
+    if(rs[x])upd(x,rs[x]);
+}
+int build(int l,int r){
+    if(l&gt;r)return 0;
+    int m=l+r&gt;&gt;1;     
+    _cmp^=1;
+    std::nth_element(g+l,g+m,g+r+1,cmp);
+    ls[g[m]]=build(l,m-1),
+    rs[g[m]]=build(m+1,r);
+    _cmp^=1;
+    pu(g[m]);return g[m];
+}
+bool bad(int x){return 4*siz[x]&lt;=3*max(siz[ls[x]],siz[rs[x]]);}
+void get(int x){if(x)get(ls[x]),g[++tt]=x,get(rs[x]);}
+void rb(int&amp;x){tt=0,get(x),x=build(1,tt);}
+void ins(int&amp;x,int v){
+    if(!x){pu(x=v);return;}
+    _cmp^=1;
+    ins(cmp(v,x)?ls[x]:rs[x],v);
+    _cmp^=1;
+    pu(x);
+    if(bad(x))rb(x);
+}
+int ql,qr,qu,qd;
+int ask(int x){
+    if(!x||qr&lt;L[x]||ql&gt;R[x]||qu&lt;D[x]||qd&gt;U[x])return 0;
+    if(ql&lt;=L[x]&amp;&amp;R[x]&lt;=qr&amp;&amp;qd&lt;=D[x]&amp;&amp;qu&gt;=U[x])return s[x];
+    return ask(ls[x])+ask(rs[x])+
+        ((ql&lt;=t[x].x&amp;&amp;t[x].x&lt;=qr&amp;&amp;qd&lt;=t[x].y&amp;&amp;t[x].y&lt;=qu)?t[x].v:0);
+}
+int main(){
+    scanf(&#34;%d&#34;,&amp;n);
+    while(1){
+        int opt,x,y,v;
+        scanf(&#34;%d&#34;,&amp;opt);
+        if(opt==3)break;
+        if(opt==1)
+            scanf(&#34;%d%d%d&#34;,&amp;x,&amp;y,&amp;v),
+            x^=la,y^=la,v^=la,
+            t[++cnt]=(node){x,y,v},
+            ins(rt,cnt);
+        else 
+            scanf(&#34;%d%d%d%d&#34;,&amp;ql,&amp;qd,&amp;qr,&amp;qu),
+            ql^=la,qr^=la,qu^=la,qd^=la,
+            printf(&#34;%d\n&#34;,la=ask(rt));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

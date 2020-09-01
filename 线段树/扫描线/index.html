@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>扫描线</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">扫描线</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P5490">扫描线</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=2000011;
+int n,s[N*4],len[N*4],v[N];
+struct node{
+    int p,l,r,v;
+    bool operator&lt;(node t){return p==t.p?v&gt;t.v:p&lt;t.p;}
+}a[N];
+struct qwq{
+    int p,id,typ;
+    bool operator&lt;(qwq t){return p&lt;t.p;}
+}b[N];
+#define ls rt&lt;&lt;1
+#define rs rt&lt;&lt;1|1
+void pu(int rt,int l,int r){
+    if(s[rt])len[rt]=v[r+1]-v[l];
+    else len[rt]=len[ls]+len[rs];
+}
+void upd(int L,int R,int v,int l,int r,int rt){
+    if(L&lt;=l&amp;&amp;r&lt;=R){
+        s[rt]+=v,pu(rt,l,r);
+        return;
+    }
+    int m=(l+r)&gt;&gt;1;
+    if(L&lt;=m)upd(L,R,v,l,m,ls);
+    if(R&gt;m)upd(L,R,v,m+1,r,rs);
+    pu(rt,l,r);
+}
+int main(){
+    scanf(&#34;%d&#34;,&amp;n);
+    int x,y,X,Y,d=0;
+    for(int i=1;i&lt;=n;++i){
+        scanf(&#34;%d%d%d%d&#34;,&amp;x,&amp;y,&amp;X,&amp;Y);
+        a[i]=(node){x,y,Y,1};
+        a[i+n]=(node){X,y,Y,-1};
+        b[i]=(qwq){y,i,0};
+        b[i+n]=(qwq){Y,i,1};
+    }
+    std::sort(b+1,b+n+n+1);
+    for(int i=1;i&lt;=n+n;++i){
+        d+=b[i].p!=b[i-1].p;
+        v[d]=b[i].p;
+        if(b[i].typ)a[b[i].id].r=a[b[i].id+n].r=d;
+        else a[b[i].id].l=a[b[i].id+n].l=d;
+    }
+    n+=n;
+    std::sort(a+1,a+n+1);
+    long long ans=0;
+    for(int i=1;i&lt;=n;++i)
+        upd(a[i].l,a[i].r-1,a[i].v,1,d,1),
+        ans+=1ll*len[1]*(a[i+1].p-a[i].p);
+    printf(&#34;%lld\n&#34;,ans);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

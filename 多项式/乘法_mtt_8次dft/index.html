@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>乘法_mtt_8次dft</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">乘法_mtt_8次dft</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4245">LG 4245 【模板】任意模数NTT</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=1&lt;&lt;18;
+typedef long double ld;
+typedef long long ll;
+const ld Pi=acos(-1);
+struct cp{
+    ld r,i;explicit cp(ld R=0,ld I=0){r=R,i=I;}
+    cp operator+(const cp&amp;x){return cp(r+x.r,i+x.i);}
+    cp operator-(const cp&amp;x){return cp(r-x.r,i-x.i);}
+    cp operator*(const cp&amp;x){return cp(r*x.r-i*x.i,r*x.i+i*x.r);}
+};
+int L,r[N],p;
+void swap(cp&amp;x,cp&amp;y){cp t=x;x=y;y=t;}
+void getL(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=0;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+}
+void fft(cp*A,int typ){
+    for(int i=0;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        cp Wn(std::cos(Pi/len),typ*std::sin(Pi/len));
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1){
+            cp w(1);
+            for(int k=0;k&lt;len;++k){
+                cp t=w*A[i+k+len];
+                A[i+k+len]=A[i+k]-t;
+                A[i+k]=A[i+k]+t;
+                w=w*Wn;
+            }
+        }
+    }
+    if(~typ)return;
+    for(int i=0;i&lt;L;++i)A[i].r/=L,A[i].i/=L;
+}
+ll num(const ld&amp;x){return ll(x+0.5)%p;}
+void mtt(int*a,int*b,int*c){
+    static cp A[N],B[N],C[N],D[N],
+        E[N],F[N],G[N],H[N];
+    for(int i=0;i&lt;L;++i)
+        a[i]%=p,b[i]%=p,
+        A[i].r=a[i]&gt;&gt;15,B[i].r=a[i]&amp;32767,
+        C[i].r=b[i]&gt;&gt;15,D[i].r=b[i]&amp;32767;
+    fft(A,1),fft(B,1),fft(C,1),fft(D,1);
+    for(int i=0;i&lt;L;++i)
+        E[i]=A[i]*C[i],F[i]=B[i]*C[i],
+        G[i]=A[i]*D[i],H[i]=B[i]*D[i];
+    fft(E,-1),fft(F,-1),fft(G,-1),fft(H,-1);
+    for(int i=0;i&lt;L;++i)
+        c[i]=(
+            (num(E[i].r)&lt;&lt;30)%p+ // 二次项
+            (num(F[i].r+G[i].r)&lt;&lt;15)%p+ // 一次项
+            num(H[i].r) // 常数项
+        )%p;
+}
+int a[N],b[N],c[N];
+int main(){
+    int n,m;
+    scanf(&#34;%d%d%d&#34;,&amp;n,&amp;m,&amp;p);++n,++m;
+    for(int i=0;i&lt;n;++i)scanf(&#34;%d&#34;,a+i);
+    for(int i=0;i&lt;m;++i)scanf(&#34;%d&#34;,b+i);
+    getL(n+m);
+    mtt(a,b,c);
+    for(int i=0;i&lt;n+m-1;++i)printf(&#34;%d &#34;,c[i]);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

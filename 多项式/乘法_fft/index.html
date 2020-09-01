@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>乘法_fft</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">乘法_fft</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3803">LG 3803 【模板】多项式乘法（FFT）</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=1&lt;&lt;21;
+typedef double db;
+const db Pi=acos(-1);
+struct cp{
+    db r,i;explicit cp(db R=0,db I=0){r=R,i=I;}
+    cp operator+(const cp&amp;x){return cp(r+x.r,i+x.i);}
+    cp operator-(const cp&amp;x){return cp(r-x.r,i-x.i);}
+    cp operator*(const cp&amp;x){return cp(r*x.r-i*x.i,r*x.i+i*x.r);}
+}a[N],b[N];
+int L,r[N];
+void swap(cp&amp;x,cp&amp;y){cp t=x;x=y;y=t;}
+void getL(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=0;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+}
+void fft(cp*A,int typ){
+    for(int i=0;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        cp Wn(std::cos(Pi/len),typ*std::sin(Pi/len));
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1){
+            cp w(1);
+            for(int k=0;k&lt;len;++k){
+                cp t=w*A[i+k+len];
+                A[i+k+len]=A[i+k]-t;
+                A[i+k]=A[i+k]+t;
+                w=w*Wn;
+            }
+        }
+    }
+    if(~typ)return;
+    for(int i=0;i&lt;L;++i)A[i].r/=L,A[i].i/=L;
+}
+int main(){
+    int n,m;
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;m);++n,++m;
+    for(int i=0;i&lt;n;++i)scanf(&#34;%lf&#34;,&amp;a[i].r);
+    for(int i=0;i&lt;m;++i)scanf(&#34;%lf&#34;,&amp;b[i].r);
+    getL(n+m);
+    fft(a,1),fft(b,1);
+    for(int i=0;i&lt;L;++i)a[i]=a[i]*b[i];
+    fft(a,-1);
+    for(int i=0;i&lt;n+m-1;++i)printf(&#34;%d &#34;,int(a[i].r+0.5));
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

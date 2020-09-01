@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>标记永久化</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">标记永久化</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3372">区间加线段树</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+const int N=100011;
+#define ls rt&lt;&lt;1
+#define rs rt&lt;&lt;1|1
+int n,q;
+typedef long long ll;
+ll s[N&lt;&lt;2],tag[N&lt;&lt;2];
+void build(int l,int r,int rt){
+    if(l==r){scanf(&#34;%lld&#34;,s+rt);return;}
+    int m=l+r&gt;&gt;1;
+    build(l,m,ls),build(m+1,r,rs);
+    s[rt]=s[ls]+s[rs];
+}
+void upd(int L,int R,ll v,int l,int r,int rt){
+    s[rt]+=v*(R-L+1);
+    if(L==l&amp;&amp;r==R){tag[rt]+=v;return;}
+    int m=l+r&gt;&gt;1;
+    if(L&gt;m)upd(L,R,v,m+1,r,rs);
+    else if(R&lt;=m)upd(L,R,v,l,m,ls);
+    else upd(L,m,v,l,m,ls),upd(m+1,R,v,m+1,r,rs);
+}
+ll ask(int L,int R,int l=1,int r=n,int rt=1,ll ad=0){
+    if(L==l&amp;&amp;r==R)return s[rt]+ad*(R-L+1);
+    int m=l+r&gt;&gt;1;ad+=tag[rt];
+    if(L&gt;m)return ask(L,R,m+1,r,rs,ad);
+    else if(R&lt;=m)return ask(L,R,l,m,ls,ad);
+    else return ask(L,m,l,m,ls,ad)+ask(m+1,R,m+1,r,rs,ad);    
+}
+int main(){
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;q);
+    build(1,n,1);
+    while(q--){
+        int opt,l,r;ll v;
+        scanf(&#34;%d%d%d&#34;,&amp;opt,&amp;l,&amp;r);
+        if(opt==1)scanf(&#34;%lld&#34;,&amp;v),upd(l,r,v,1,n,1);
+        else printf(&#34;%lld\n&#34;,ask(l,r));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

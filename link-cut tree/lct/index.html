@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>lct</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">lct</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3690">LG P3690 【模板】Link Cut Tree （动态树）</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+const int N=100011;
+int n,q,cnt,v[N],s[N],c[2][N],f[N];
+bool rev[N];
+#define ls c[0][x]
+#define rs c[1][x]
+void pu(int x){s[x]=s[ls]^s[rs]^v[x];}
+void swap(int &amp;x,int &amp;y){x^=y,y^=x,x^=y;}
+void pr(int x){rev[x]^=1,swap(ls,rs);}
+void pd(int x){
+    if(rev[x]){
+        if(ls)pr(ls);
+        if(rs)pr(rs);
+        rev[x]=0;
+    }
+}
+int g(int x){return c[1][f[x]]==x;}
+int nrt(int x){return c[0][f[x]]==x||c[1][f[x]]==x;}
+void rotate(int x){
+    int y=f[x],z=f[y],l=g(x),r=!l,w=c[r][x];
+    if(nrt(y))c[g(y)][z]=x;
+    c[r][x]=y,c[l][y]=w;
+    if(w)f[w]=y;
+    f[x]=z,f[y]=x;
+    pu(y);
+}
+void pda(int x){if(nrt(x))pda(f[x]);pd(x);}
+void splay(int x){
+    for(pda(x);nrt(x);rotate(x))
+        if(nrt(f[x]))rotate(g(x)^g(f[x])?x:f[x]);
+    pu(x);
+}
+void access(int x){
+    for(int y=0;x;x=f[y=x])
+        splay(x),rs=y,pu(x);
+}
+void mrt(int x){
+    access(x),splay(x),pr(x);
+}
+int frt(int x){
+    for(access(x),splay(x);ls;pd(x),x=ls);
+    splay(x);return x;
+}
+void sl(int x,int y){
+    mrt(x),access(y),splay(y);
+}
+void link(int x,int y){
+    mrt(x);
+    if(frt(y)!=x)f[x]=y;
+}
+void cut(int x,int y){
+    mrt(x);
+    if(frt(y)==x&amp;&amp;f[y]==x)
+        f[y]=c[1][y]=0,pu(x);
+}
+int main(){
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;q);
+    for(int i=1;i&lt;=n;++i)scanf(&#34;%d&#34;,v+i);
+    while(q--){
+        int opt,x,y;
+        scanf(&#34;%d%d%d&#34;,&amp;opt,&amp;x,&amp;y);
+        if(opt==0)sl(x,y),printf(&#34;%d\n&#34;,s[y]);
+        if(opt==1)link(x,y);
+        if(opt==2)cut(x,y);
+        if(opt==3)splay(x),v[x]=y;
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>乘法逆_ntt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">乘法逆_ntt</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4238">LG 4238 【模板】多项式乘法逆</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int P=998244353,N=1&lt;&lt;18;
+int pw(int x,int b){
+    int res=1;
+    for(;b;b&gt;&gt;=1,x=1ll*x*x%P)
+        if(b&amp;1)res=1ll*res*x%P;
+    return res;
+}
+int inv(int x){return pw(x,P-2);}
+int L,r[N];
+void getL(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=0;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+}
+void swap(int&amp;x,int&amp;y){int t=x;x=y;y=t;}
+void mod(int&amp;x){if(x&gt;=P)x-=P;}
+const int G=3,Gi=inv(G);
+void ntt(int*A,int typ){
+    for(int i=0;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        int Wn=pw(~typ?G:Gi,(P-1)/(len&lt;&lt;1));
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1){
+            int w=1;
+            for(int k=0;k&lt;len;++k,w=1ll*w*Wn%P){
+                int t=1ll*w*A[i+k+len]%P;
+                mod(A[i+k+len]=A[i+k]-t+P);
+                mod(A[i+k]+=t);
+            }
+        }
+    }
+    if(~typ)return;
+    for(int i=0,iL=inv(L);i&lt;L;++i)A[i]=1ll*A[i]*iL%P;
+}
+void get_inv(int*A,int*B,int n){
+    if(n==1)return B[0]=inv(A[0]),void();
+    get_inv(A,B,(n+1)&gt;&gt;1);
+    getL(n&lt;&lt;1);
+    static int C[N];
+    memcpy(C,A,n*4);memset(C+n,0,(L-n)*4);
+    // for(int i=0;i&lt;n;++i)C[i]=A[i];
+    // for(int i=n;i&lt;L;++i)C[i]=0;
+    ntt(C,1),ntt(B,1);
+    for(int i=0;i&lt;L;++i)
+        B[i]=1ll*B[i]*(2ll-1ll*C[i]*B[i]%P+P)%P;
+    ntt(B,-1);
+    memset(B+n,0,(L-n)*4);
+    // for(int i=n;i&lt;L;++i)B[i]=0;
+}
+int main(){
+    static int n,a[N],b[N];
+    scanf(&#34;%d&#34;,&amp;n);
+    for(int i=0;i&lt;n;++i)scanf(&#34;%d&#34;,a+i);
+    get_inv(a,b,n);
+    for(int i=0;i&lt;n;++i)printf(&#34;%d &#34;,b[i]);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

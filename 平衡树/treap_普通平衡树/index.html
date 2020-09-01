@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>treap_普通平衡树</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">treap_普通平衡树</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3369">普通平衡树</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+#include&lt;time.h&gt;
+#include&lt;cstdlib&gt;
+const int N=100011;
+#define ls c[0][x]
+#define rs c[1][x]
+int RT,cnt,q,c[2][N],w[N],sz[N],rnd[N];
+void pu(int x){sz[x]=sz[ls]+sz[rs]+1;}
+void turn(int &amp;x,int p){
+    int y=c[p][x];
+    c[p][x]=c[!p][y],c[!p][y]=x;
+    pu(x),pu(x=y);
+}
+void ins(int &amp;x,int v){
+    if(!x){
+        sz[x=++cnt]=1,w[x]=v,rnd[x]=rand();
+        return;
+    }
+    ++sz[x];
+    int p=v&gt;w[x];
+    ins(c[p][x],v);
+    if(rnd[x]&gt;rnd[c[p][x]])turn(x,p);
+}
+void del(int &amp;x,int v){
+    if(w[x]==v){
+        if(!ls||!rs){x=ls|rs;return;}
+        int p=rnd[ls]&gt;rnd[rs];
+        turn(x,p),del(c[!p][x],v);
+    }
+    else del(c[v&gt;w[x]][x],v);
+    pu(x);
+}
+int rnk(int x,int v){
+    if(!x)return 1;
+    return v&gt;w[x]?sz[ls]+1+rnk(rs,v):rnk(ls,v);
+}
+int kth(int x,int k){
+    if(sz[ls]==k-1)return w[x];
+    return k&gt;sz[ls]?kth(rs,k-sz[ls]-1):kth(ls,k);
+}
+int min(int x,int y){return x&lt;y?x:y;}
+int max(int x,int y){return x&gt;y?x:y;}
+int pre(int x,int v){
+    if(!x)return -(-1u&gt;&gt;1);
+    return w[x]&lt;v?max(w[x],pre(rs,v)):pre(ls,v);
+}
+int nxt(int x,int v){
+    if(!x)return -1u&gt;&gt;1;
+    return w[x]&gt;v?min(w[x],nxt(ls,v)):nxt(rs,v);
+}
+int main(){
+    srand(time(0));
+    scanf(&#34;%d&#34;,&amp;q);
+    while(q--){
+        int opt,x;
+        scanf(&#34;%d%d&#34;,&amp;opt,&amp;x);
+        if(opt==1)ins(RT,x);
+        else if(opt==2)del(RT,x);
+        else if(opt==3)printf(&#34;%d\n&#34;,rnk(RT,x));
+        else if(opt==4)printf(&#34;%d\n&#34;,kth(RT,x));
+        else if(opt==5)printf(&#34;%d\n&#34;,pre(RT,x));
+        else if(opt==6)printf(&#34;%d\n&#34;,nxt(RT,x));
+    }
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>

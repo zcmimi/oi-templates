@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>fhqtreap_文艺平衡树</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href=".." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">fhqtreap_文艺平衡树</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P3391">文艺平衡树</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;cstdio&gt;
+#include&lt;time.h&gt;
+#include&lt;cstdlib&gt;
+const int N=100011;
+int n,q,RT,rnd[N],c[2][N],sz[N],v[N];
+bool rev[N];
+#define ls c[0][rt]
+#define rs c[1][rt]
+void pu(int rt){sz[rt]=sz[ls]+sz[rs]+1;}
+void pd(int rt){
+    if(rev[rt]){
+        ls^=rs,rs^=ls,ls^=rs;
+        rev[ls]^=1,rev[rs]^=1;
+        rev[rt]=0;
+    }
+}
+void sl(int rt,int k,int &amp;x,int &amp;y){
+    if(!rt){x=y=0;return;}
+    pd(rt);
+    if(sz[ls]&gt;=k)y=rt,sl(ls,k,x,ls);
+    else x=rt,sl(rs,k-sz[ls]-1,rs,y);
+    pu(rt);
+}
+int mg(int x,int y){
+    if(!x||!y)return x+y;
+    pd(x),pd(y);
+    if(rnd[x]&lt;rnd[y]){
+        c[1][x]=mg(c[1][x],y);
+        pu(x);return x;
+    }
+    else{
+        c[0][y]=mg(x,c[0][y]);
+        pu(y);return y;
+    }
+}
+void op(int rt){
+    pd(rt);
+    if(ls)op(ls);
+    printf(&#34;%d &#34;,v[rt]);
+    if(rs)op(rs);
+}
+int main(){
+    srand(time(0));
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;q);
+    for(int i=1;i&lt;=n;++i)sz[i]=1,v[i]=i,rnd[i]=rand(),RT=mg(RT,i);
+    while(q--){
+        int l,r,x,y,z;
+        scanf(&#34;%d%d&#34;,&amp;l,&amp;r);
+        sl(RT,r,x,z);
+        sl(x,l-1,x,y);
+        rev[y]^=1;
+        RT=mg(x,mg(y,z));
+    }
+    op(RT);
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>
