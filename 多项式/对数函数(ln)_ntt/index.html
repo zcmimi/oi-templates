@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-    <title>乘法逆元_任意模数_ntt_纯数组</title>
+    <title>对数函数(ln)_ntt</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
@@ -21,95 +21,102 @@
     <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
         <div class="mdui-toolbar mdui-color-theme">
             <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
-            <a href="/多项式/乘法逆元_任意模数_ntt_纯数组/.." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
-            <div class="mdui-typo-title">乘法逆元_任意模数_ntt_纯数组</div>
+            <a href="/多项式/对数函数(ln)_ntt/.." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">对数函数(ln)_ntt</div>
             <div class="mdui-toolbar-spacer"></div>
         </div>
     </div>
 
     <div class="mdui-container" style="padding-top: 50px">
 <div class="mdui-card">
-    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4239">LG 4239 任意模数多项式乘法逆</a></p>
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4725">4725 【模板】多项式对数函数（多项式 ln）</a></p>
 </div>
 </div>
 
 <pre><code class="lang-cpp">
 #include&lt;bits/stdc++.h&gt;
-const int N=1&lt;&lt;18,P=1e9+7;
-typedef long long ll;
-int pw(int x,int b,int p){
+const int N=1&lt;&lt;18|1,P=998244353;
+int pw(int x,int b){
     int res=1;
-    for(;b;b&gt;&gt;=1,x=1ll*x*x%p)
-        if(b&amp;1)res=1ll*res*x%p;
+    for(;b;b&gt;&gt;=1,x=1ll*x*x%P)
+        if(b&amp;1)res=1ll*res*x%P;
     return res;
 }
-int inv(int x,int p){return pw(x,p-2,p);}
-inline void swap(int&amp;x,int&amp;y){int t=x;x=y;y=t;}
+int inv(int x){return pw(x,P-2);}
 int L,r[N];
 void getL(int n){
     for(L=1;L&lt;n;L&lt;&lt;=1);
     for(int i=0;i&lt;L;++i)
         r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
 }
-int mod(const int&amp;x,int p){return x+(x&gt;&gt;31&amp;p);}
-void ntt(int*A,int typ,int p){
-    int g=~typ?3:inv(3,p);
+void swap(int&amp;x,int&amp;y){int t=x;x=y;y=t;}
+int mod(const int&amp;x){return x+(x&gt;&gt;31&amp;P);}
+const int G=3,i2=inv(2);
+void ntt(int*A,int typ){
+    int g=~typ?G:inv(G);
     for(int i=0;i&lt;L;++i)
         if(i&lt;r[i])swap(A[i],A[r[i]]);
     for(int len=1;len&lt;L;len&lt;&lt;=1){
-        int Wn=pw(g,(p-1)/(len&lt;&lt;1),p);
+        int Wn=pw(g,(P-1)/(len&lt;&lt;1));
         for(int i=0;i&lt;L;i+=len&lt;&lt;1){
             int w=1;
             for(int k=0;k&lt;len;++k){
-                int t=1ll*w*A[i+k+len]%p;
-                A[i+k+len]=mod(A[i+k]-t,p);
-                A[i+k]=mod(A[i+k]+t-p,p);
-                w=1ll*w*Wn%p;
+                int t=1ll*w*A[i+k+len]%P;
+                A[i+k+len]=mod(A[i+k]-t);
+                A[i+k]=mod(A[i+k]+t-P);
+                w=1ll*w*Wn%P;
             }
         }
     }
     if(~typ)return;
-    for(int i=0,iL=inv(L,p);i&lt;L;++i)
-        A[i]=1ll*A[i]*iL%p;
+    for(int i=0,iL=inv(L);i&lt;L;++i)
+        A[i]=1ll*A[i]*iL%P;
 }
-void mul(int*A,int*B,int*C,int n,int p){
+void mul(int*A,int*B,int*C,int n){
     static int a[N],b[N];
+    getL(n&lt;&lt;1);
     memcpy(a,A,n*4),memcpy(b,B,n*4);
     memset(a+n,0,(L-n)*4),memset(b+n,0,(L-n)*4);
-    ntt(a,1,p),ntt(b,1,p);
-    for(int i=0;i&lt;L;++i)C[i]=1ll*a[i]*b[i]%p;
-    ntt(C,-1,p);
+    ntt(a,1),ntt(b,1);
+    for(int i=0;i&lt;L;++i)
+        C[i]=1ll*a[i]*b[i]%P;
+    ntt(C,-1);
+    memset(C+n,0,(L-n)*4);
 }
-const int m1=998244353,m2=1004535809,m3=469762049;
-const ll m12=1ll*m1*m2;
-const int i1=inv(m1,m2),i12=inv(m12%m3,m3);
-int crt(int A,int B,int C){
-    ll D=A+ll(B-A+m2)%m2*i1%m2*m1;
-    return (D+ll(C-D%m3+m3)%m3*i12%m3*(m12%P)%P)%P;
-}
-void inv(int*a,int*b,int n){
-    if(n==1)return b[0]=inv(a[0],P),void();
-    inv(a,b,n+1&gt;&gt;1);
+void inv(int*A,int*B,int n){
+    if(n==1)return B[0]=inv(A[0]),void();
+    inv(A,B,(n+1)&gt;&gt;1);
     getL(n&lt;&lt;1);
-    static int A[N],B[N],C[N];
-    mul(a,b,A,n,m1);
-    mul(a,b,B,n,m2);
-    mul(a,b,C,n,m3);
+    static int C[N];
+    memcpy(C,A,n*4);memset(C+n,0,(L-n)*4);
+    ntt(B,1),ntt(C,1);
+    for(int i=0;i&lt;L;++i)
+        B[i]=1ll*B[i]*mod(2-1ll*C[i]*B[i]%P)%P;
+    ntt(B,-1);
+    memset(B+n,0,(L-n)*4);
+}
+void dvt(int*A,int*B,int n){ // 求导
     for(int i=1;i&lt;n;++i)
-        A[i]=B[i]=C[i]=mod(-crt(A[i],B[i],C[i]),P);
-    A[0]=B[0]=C[0]=1;
-    mul(A,b,A,n,m1);
-    mul(B,b,B,n,m2);
-    mul(C,b,C,n,m3);
-
-    for(int i=0;i&lt;n;++i)
-        b[i]=crt(A[i],B[i],C[i]);
+        B[i-1]=1ll*i*A[i]%P;
+    B[n-1]=0;
+}
+void itr(int*A,int*B,int n){ // 积分
+    for(int i=1;i&lt;n;++i)
+        B[i]=1ll*A[i-1]*inv(i)%P;
+    B[0]=0;
+}
+void ln(int*A,int*B,int n){
+    static int a[N],b[N],B_[N];
+    memset(b,0,n*4);// 求逆前记得初始化
+    dvt(A,a,n),inv(A,b,n);
+    mul(a,b,B_,n);
+    itr(B_,B,n);
 }
 int main(){
-    static int n,a[N],b[N];
+    int n;static int a[N],b[N];
     scanf(&#34;%d&#34;,&amp;n);
     for(int i=0;i&lt;n;++i)scanf(&#34;%d&#34;,a+i);
-    inv(a,b,n);
+    ln(a,b,n);
     for(int i=0;i&lt;n;++i)printf(&#34;%d &#34;,b[i]);
 }</code></pre>
     </div>

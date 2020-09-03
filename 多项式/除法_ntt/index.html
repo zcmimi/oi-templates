@@ -80,9 +80,9 @@ void mul(int*A,int*B,int*C,int n){
         C[i]=1ll*a[i]*b[i]%P;
     ntt(C,-1);
 }
-void get_inv(int*A,int*B,int n){
+void inv(int*A,int*B,int n){
     if(n==1)return B[0]=inv(A[0]),void();
-    get_inv(A,B,(n+1)&gt;&gt;1);
+    inv(A,B,(n+1)&gt;&gt;1);
     getL(n&lt;&lt;1);
     static int C[N];
     memcpy(C,A,n*4);
@@ -100,7 +100,7 @@ int main(){
         scanf(&#34;%d&#34;,f+i),q[n-i]=f[i];
     for(int i=0;i&lt;=m;++i)
         scanf(&#34;%d&#34;,g+i),gr[m-i]=g[i];
-    get_inv(gr,gri,n-m+1);
+    inv(gr,gri,n-m+1);
     mul(q,gri,q,n-m+1);
     std::reverse(q,q+n-m+1);
     for(int i=n-m+1;i&lt;=n;++i)q[i]=0;
