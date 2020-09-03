@@ -47,9 +47,9 @@ int L,r[N];
 void getL(int n){
     for(L=1;L&lt;n;L&lt;&lt;=1);
     for(int i=0;i&lt;L;++i)
-        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):1);
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
 }
-void swap(int&amp;x,int&amp;y){int t=x;x=y;y=x;}
+void swap(int&amp;x,int&amp;y){int t=x;x=y;y=t;}
 int mod(const int&amp;x){return x+(x&gt;&gt;31&amp;P);}
 const int G=3,i2=inv(2);
 void ntt(int*A,int typ){
@@ -74,18 +74,21 @@ void ntt(int*A,int typ){
 }
 void mul(int*A,int*B,int*C,int n){
     static int a[N],b[N];
+    getL(n&lt;&lt;1);
     memcpy(a,A,n*4),memcpy(b,B,n*4);
+    memset(a+n,0,(L-n)*4),memset(b+n,0,(L-n)*4);
     ntt(a,1),ntt(b,1);
     for(int i=0;i&lt;L;++i)
-        C[i]=1ll*a[i]*a[i]%P;
+        C[i]=1ll*a[i]*b[i]%P;
     ntt(C,-1);
+    memset(C+n,0,(L-n)*4);
 }
 void inv(int*A,int*B,int n){
     if(n==1)return B[0]=inv(A[0]),void();
     inv(A,B,(n+1)&gt;&gt;1);
     getL(n&lt;&lt;1);
     static int C[N];
-    memcpy(C,A,n*4);
+    memcpy(C,A,n*4);memset(C+n,0,(L-n)*4);
     ntt(B,1),ntt(C,1);
     for(int i=0;i&lt;L;++i)
         B[i]=1ll*B[i]*mod(2-1ll*C[i]*B[i]%P)%P;
@@ -94,8 +97,9 @@ void inv(int*A,int*B,int n){
 }
 void sqr(int*A,int*B,int n){
     if(n==1)return B[0]=1,void();
-    sqr(A,B,n+1&gt;&gt;1);
+    sqr(A,B,(n+1)&gt;&gt;1);
     static int C[N];
+    memset(C,0,n*4);
     inv(B,C,n);
     mul(A,C,C,n);
     for(int i=0;i&lt;n;++i)
