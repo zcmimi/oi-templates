@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>除法_ntt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/css/mdui.min.css">
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css">
+    <script async src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <style>
+        body,code{
+            font-family: Monaco,Consolas,hack,"微软雅黑";
+            font-size: 17px;
+        }
+    </style>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-accent-blue">
+    <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset mdui-color-white">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">home</i></a>
+            <a href="/多项式/除法_ntt/.." class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">arrow_upward</i></a>
+            <div class="mdui-typo-title">除法_ntt</div>
+            <div class="mdui-toolbar-spacer"></div>
+        </div>
+    </div>
+
+    <div class="mdui-container" style="padding-top: 50px">
+<div class="mdui-card">
+    <div class="mdui-card-content mdui-typo"><p><a href="https://www.luogu.com.cn/problem/P4512">LG 4512 【模板】多项式除法</a></p>
+</div>
+</div>
+
+<pre><code class="lang-cpp">
+#include&lt;bits/stdc++.h&gt;
+const int N=1&lt;&lt;19|1,P=998244353,G=3;
+int pw(int x,int b){
+    int res=1;
+    for(;b;b&gt;&gt;=1,x=1ll*x*x%P)
+        if(b&amp;1)res=1ll*res*x%P;
+    return res;
+}
+int inv(int x){return pw(x,P-2);}
+int L,r[N];
+void getL(int n){
+    for(L=1;L&lt;n;L&lt;&lt;=1);
+    for(int i=1;i&lt;L;++i)
+        r[i]=(r[i&gt;&gt;1]&gt;&gt;1)|((i&amp;1)?(L&gt;&gt;1):0);
+}
+void swap(int&amp;x,int&amp;y){int t=x;x=y;y=t;}
+int mod(const int&amp;x){return x+(x&gt;&gt;31&amp;P);}
+void ntt(int*A,int typ){
+    int g=~typ?G:inv(G);
+    for(int i=1;i&lt;L;++i)
+        if(i&lt;r[i])swap(A[i],A[r[i]]);
+    for(int len=1;len&lt;L;len&lt;&lt;=1){
+        int Wn=pw(g,(P-1)/(len&lt;&lt;1));
+        for(int i=0;i&lt;L;i+=len&lt;&lt;1){
+            int w=1;
+            for(int k=0;k&lt;len;++k){
+                int t=1ll*w*A[i+k+len]%P;
+                A[i+k+len]=mod(A[i+k]-t);
+                A[i+k]=mod(A[i+k]+t-P);
+                w=1ll*w*Wn%P;
+            }
+        }
+    }
+    if(~typ)return;
+    for(int i=0,iL=inv(L);i&lt;L;++i)
+        A[i]=1ll*A[i]*iL%P;
+}
+void mul(int*A,int*B,int*C,int n){
+    getL(n&lt;&lt;1);
+    static int a[N],b[N];
+    memcpy(a,A,n*4),memcpy(b,B,n*4);
+    ntt(a,1),ntt(b,1);
+    for(int i=0;i&lt;L;++i)
+        C[i]=1ll*a[i]*b[i]%P;
+    ntt(C,-1);
+}
+void get_inv(int*A,int*B,int n){
+    if(n==1)return B[0]=inv(A[0]),void();
+    get_inv(A,B,(n+1)&gt;&gt;1);
+    getL(n&lt;&lt;1);
+    static int C[N];
+    memcpy(C,A,n*4);
+    ntt(B,1),ntt(C,1);
+    for(int i=0;i&lt;L;++i)
+        B[i]=1ll*B[i]*mod(2-1ll*C[i]*B[i]%P)%P;
+    ntt(B,-1);
+    memset(B+n,0,(L-n)*4);
+}
+int main(){
+    int n,m;
+    static int f[N],g[N],gr[N],gri[N],q[N],r[N];
+    scanf(&#34;%d%d&#34;,&amp;n,&amp;m);
+    for(int i=0;i&lt;=n;++i)
+        scanf(&#34;%d&#34;,f+i),q[n-i]=f[i];
+    for(int i=0;i&lt;=m;++i)
+        scanf(&#34;%d&#34;,g+i),gr[m-i]=g[i];
+    get_inv(gr,gri,n-m+1);
+    mul(q,gri,q,n-m+1);
+    std::reverse(q,q+n-m+1);
+    for(int i=n-m+1;i&lt;=n;++i)q[i]=0;
+    for(int i=0;i&lt;=n-m;++i)printf(&#34;%d &#34;,q[i]);putchar(&#39;\n&#39;);
+    mul(g,q,r,n&lt;&lt;1);
+    for(int i=0;i&lt;m;++i)printf(&#34;%d &#34;,mod(f[i]-r[i]));
+}</code></pre>
+    </div>
+</body>
+<script async src="https://cdn.jsdelivr.net/gh/zcmimi/cdn@master/material/assets/mdui/js/mdui.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+<script src="/assets/bundle.js"></script>
+<script>katex_();highlight();</script>
+</html>
